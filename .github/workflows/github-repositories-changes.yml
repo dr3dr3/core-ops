@@ -1,0 +1,103 @@
+name: GITHUB-SETUP-REPOSITORY
+run-name: In GitHub create/update repositories ( ${{ github.event_name }} run by ${{ github.actor }} )
+
+on:
+  # Called from Platform Orchestrator Workflows
+  workflow_call:
+    inputs:
+      repoName: 
+        required: true
+        type: string
+      repoDesc: 
+        required: true
+        type: string
+      templateRepoOwner:
+        required: true
+        type: string
+      templateRepoName:
+        required: true
+        type: string
+      branchingStrategy:
+        required: false
+        type: string
+        default: gitflow
+      enableGitHubPages:
+        required: false
+        type: boolean
+        default: false
+  
+permissions:
+  contents: write
+
+jobs:
+
+  repo-changes:
+    name: Make changes to repos
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Check repo exists
+        id: repo-exists
+        run: .github/actions-scripts/github/repo-check-exists.mjs
+        env:
+          GHA_TOKEN: ${{ secrets.OPS_PAT }}
+          REPO_OWNER: ${{ github.repository_owner	}}
+          REPO_NAME: ${{ inputs.repoName }}
+
+      - name: Check template exists
+        id: template-exists
+        run: .github/actions-scripts/repo-template-exists.mjs
+        env:
+          GHA_TOKEN: ${{ secrets.OPS_PAT }}
+          REPO_OWNER: ${{ inputs.templateRepoOwner }}
+          REPO_NAME: ${{ inputs.templateRepoName }}
+
+      - name: Create repo
+        id: create-repo
+        if: ${{ steps.repo-exists.outputs.result != 'true'  && steps.template-exists.outputs.result == 'true' }}
+        run: .github/actions-scripts/repo-create-using-template.mjs
+        env:
+          GHA_TOKEN: ${{ secrets.OPS_PAT }}
+          REPO_TEMPLATE_OWNER: ${{ inputs.templateRepoOwner }}
+          REPO_TEMPLATE_NAME: ${{ inputs.templateRepoName }}
+          REPO_OWNER: ${{ github.repository_owner	 }}
+          REPO_NAME: ${{ inputs.repoName }}
+          REPO_DESC: ${{ inputs.repoDesc }}
+
+      - name: Update repo
+        run: .github/actions-scripts/repo-update.mjs
+        env:
+          GHA_TOKEN: ${{ secrets.OPS_PAT }}
+          REPO_OWNER: ${{ github.repository_owner	 }}
+          REPO_NAME: ${{ inputs.repoName }}
+
+      - name: Update repo pages
+        if: ${{ inputs.enableGitHubPages }}
+        run: .github/actions-scripts/repo-update-pages.mjs
+        env:
+          GHA_TOKEN: ${{ secrets.OPS_PAT }}
+          REPO_OWNER: ${{ github.repository_owner	 }}
+          REPO_NAME: ${{ inputs.repoName }}
+
+      - name: Update repo branch protection
+        if: ${{ inputs.branchingStrategy == 'gitflow' }}
+        run: .github/actions-scripts/repo-update-branch-protection.mjs
+        env:
+          GHA_TOKEN: ${{ secrets.OPS_PAT }}
+          REPO_OWNER: ${{ github.repository_owner	 }}
+          REPO_NAME: ${{ inputs.repoName }}
+
+      - name: GHA Summary
+        run: echo "Repo ${{ inputs.repoName }} created" >> $GITHUB_STEP_SUMMARY
