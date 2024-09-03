@@ -41,6 +41,9 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          repository: 'dr3dr3/core-ops'
+          ref: 'main'
 
       - name: Setup Node
         uses: actions/setup-node@v4
