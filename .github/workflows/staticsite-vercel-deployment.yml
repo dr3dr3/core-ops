@@ -34,6 +34,27 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
 
+      - name: Check variable exist
+        if: ${{ env.VERCEL_PROJECT_ID == '' }}
+        run: |
+          echo "### 🚨 ERROR" >> $GITHUB_STEP_SUMMARY
+          echo "Missing VERCEL_PROJECT_ID" >> $GITHUB_STEP_SUMMARY
+          exit 1
+
+      - name: Check secret exist
+        if: ${{ env.VERCEL_ORG_ID == ''}}
+        run: |
+          echo "### 🚨 ERROR" >> $GITHUB_STEP_SUMMARY
+          echo "Missing VERCEL_ORG_ID" >> $GITHUB_STEP_SUMMARY
+          exit 1
+
+      - name: Check secret exist
+        if: ${{ env.VERCEL_TOKEN == '' }}
+        run: |
+          echo "### 🚨 ERROR" >> $GITHUB_STEP_SUMMARY
+          echo "Missing VERCEL_TOKEN" >> $GITHUB_STEP_SUMMARY
+          exit 1
+
       - uses: actions/setup-node@v4
         with:
           node-version: latest
