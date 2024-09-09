@@ -61,7 +61,7 @@ jobs:
 
       - name: Check template exists
         id: template-exists
-        run: .github/actions-scripts/repo-template-exists.mjs
+        run: .github/actions-scripts/github/repo-template-exists.mjs
         env:
           GHA_TOKEN: ${{ secrets.OPS_PAT }}
           REPO_OWNER: ${{ inputs.templateRepoOwner }}
@@ -70,7 +70,7 @@ jobs:
       - name: Create repo
         id: create-repo
         if: ${{ steps.repo-exists.outputs.result != 'true'  && steps.template-exists.outputs.result == 'true' }}
-        run: .github/actions-scripts/repo-create-using-template.mjs
+        run: .github/actions-scripts/github/repo-create-using-template.mjs
         env:
           GHA_TOKEN: ${{ secrets.OPS_PAT }}
           REPO_TEMPLATE_OWNER: ${{ inputs.templateRepoOwner }}
@@ -80,7 +80,7 @@ jobs:
           REPO_DESC: ${{ inputs.repoDesc }}
 
       - name: Update repo
-        run: .github/actions-scripts/repo-update.mjs
+        run: .github/actions-scripts/github/repo-update.mjs
         env:
           GHA_TOKEN: ${{ secrets.OPS_PAT }}
           REPO_OWNER: ${{ github.repository_owner	 }}
@@ -88,7 +88,7 @@ jobs:
 
       - name: Update repo pages
         if: ${{ inputs.enableGitHubPages }}
-        run: .github/actions-scripts/repo-update-pages.mjs
+        run: .github/actions-scripts/github/repo-update-pages.mjs
         env:
           GHA_TOKEN: ${{ secrets.OPS_PAT }}
           REPO_OWNER: ${{ github.repository_owner	 }}
@@ -96,7 +96,7 @@ jobs:
 
       - name: Update repo branch protection
         if: ${{ inputs.branchingStrategy == 'gitflow' }}
-        run: .github/actions-scripts/repo-update-branch-protection.mjs
+        run: .github/actions-scripts/github/repo-update-branch-protection.mjs
         env:
           GHA_TOKEN: ${{ secrets.OPS_PAT }}
           REPO_OWNER: ${{ github.repository_owner	 }}
