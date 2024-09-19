@@ -1,4 +1,3 @@
-# Deploy static site to configured host
 name: STATICSITE-VERCEL-DEPLOYMENT
 
 on:
