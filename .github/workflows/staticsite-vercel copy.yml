@@ -1,14 +1,9 @@
-name: STATICSITE-VERCEL-DEPLOYMENT
+name: STATICSITE-VERCEL
+run-name: Event handler for 'staticsite-vercel' ( Triggered by ${{ github.event_name }} and run by ${{ github.actor }} )
 
 on:
-  workflow_call:
-    inputs:
-      artefact-ref:
-        required: true
-        type: string
-      vercel-project-id:
-        required: true
-        type: string
+  repository_dispatch:
+    types: [staticsite-vercel]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
